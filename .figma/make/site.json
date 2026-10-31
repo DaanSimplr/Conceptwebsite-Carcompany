@@ -1,0 +1,12 @@
+{
+  "title": "Autobedrijf",
+  "description": "Occasions, bedrijfsauto's, klassiekers en motoren, plus verhuur en lease.",
+  "language": "nl",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}
+
+:root {
+  --background: #f4f7fb;
+  --foreground: #1a2030;
+  --card: #ffffff;
+  --card-foreground: #1a2030;
+  --primary: #2563a8;
+  --primary-foreground: #ffffff;
+  --secondary: #ddeaf7;
+  --secondary-foreground: #2c3e5a;
+  --muted: #e8f1fa;
+  /* donkerder dan voorheen (#6b84a3) voor WCAG AA-contrast op wit en muted */
+  --muted-foreground: #526a8a;
+  --accent: #5ba3d9;
+  --accent-foreground: #ffffff;
+  --border: #c5d9ee;
+  --ring: #2563a8;
+  --radius: 12px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar { width: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-display { font-family: 'Playfair Display', serif; }
+.font-mono-label { font-family: 'JetBrains Mono', monospace; }
+
+/* Desktopnavigatie: tekstlinks met een onderstreping voor de actieve pagina */
+.nav-link {
+  position: relative;
+  color: var(--secondary-foreground);
+  transition: color 150ms;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.25rem;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--primary);
+  transform: scaleX(0);
+  transition: transform 200ms;
+}
+.nav-link:hover { color: var(--primary); }
+.nav-link:hover::after { transform: scaleX(0.5); }
+.nav-link--active { color: var(--primary); font-weight: 600; }
+.nav-link--active::after,
+.nav-link--active:hover::after { transform: scaleX(1); }
+
+/* Mobiel menu: actieve pagina met een balk links */
+.mobile-nav-link {
+  display: block;
+  padding: 0.875rem 1.5rem;
+  border-left: 3px solid transparent;
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: background-color 150ms, color 150ms;
+}
+.mobile-nav-link:hover { background-color: var(--muted); color: var(--primary); }
+.mobile-nav-link--active {
+  border-left-color: var(--primary);
+  background-color: var(--muted);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ── Toegankelijkheid ── */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.on-dark :focus-visible,
+.on-dark:focus-visible {
+  outline-color: #ffffff;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  border-radius: calc(var(--radius) - 4px);
+  background-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.skip-link:focus { top: 1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+/* ── Knoppen (CTA's) ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 4px);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-align: center;
+  transition: background-color 150ms, color 150ms, border-color 150ms, opacity 150ms;
+}
+.btn-primary { background-color: var(--primary); color: var(--primary-foreground); }
+.btn-primary:hover { background-color: #1e5290; }
+.btn-outline { border-color: var(--primary); color: var(--primary); background-color: transparent; }
+.btn-outline:hover { background-color: var(--primary); color: var(--primary-foreground); }
+.btn-light { background-color: #ffffff; color: var(--primary); }
+.btn-light:hover { background-color: var(--secondary); }
+.btn-ghost-light { background-color: rgba(255, 255, 255, 0.15); color: #ffffff; border-color: rgba(255, 255, 255, 0.45); }
+.btn-ghost-light:hover { background-color: rgba(255, 255, 255, 0.28); }
+.btn-disabled { background-color: var(--muted); color: var(--muted-foreground); cursor: not-allowed; }
+
+/* ── Formuliervelden ── */
+.field {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  background-color: var(--muted);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  transition: border-color 150ms, background-color 150ms;
+}
+.field:focus { border-color: var(--primary); background-color: var(--card); outline: none; box-shadow: 0 0 0 3px var(--secondary); }
+.field::placeholder { color: var(--muted-foreground); }
+}
