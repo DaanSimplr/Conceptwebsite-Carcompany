@@ -22,4 +22,7 @@ export const router = createBrowserRouter([
       { path: "contact", Component: Contact },
     ],
   },
-]);
+], {
+  // "/" lokaal, "/Conceptwebsite-Carcompany" op GitHub Pages
+  basename: import.meta.env.BASE_URL.replace(/\/$/, "") || "/",
+});
