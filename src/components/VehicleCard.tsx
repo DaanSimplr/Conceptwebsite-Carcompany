@@ -1,93 +1,94 @@
 import { Link } from "react-router";
 import type { Vehicle } from "../data/inventory";
-import { useLang } from "../context/LangContext";
+import { useLang, type Localized } from "../context/LangContext";
 
-const STATUS_COLORS: Record<Vehicle["status"], { bg: string; text: string; label_nl: string; label_en: string }> = {
-  beschikbaar: { bg: "#d1fae5", text: "#065f46", label_nl: "Beschikbaar", label_en: "Available" },
-  gereserveerd: { bg: "#fef3c7", text: "#92400e", label_nl: "Gereserveerd", label_en: "Reserved" },
-  verkocht:    { bg: "#fee2e2", text: "#991b1b", label_nl: "Verkocht",     label_en: "Sold" },
-  verhuur:     { bg: "#dbeafe", text: "#1e40af", label_nl: "Verhuur",      label_en: "Rental" },
+// Kleur en tekst van het statuslabel linksboven op de foto.
+// Toegankelijkheid: elke combinatie voldoet aan WCAG AA-contrast.
+const STATUS_STYLES: Record<Vehicle["status"], { bg: string; text: string; label: Localized }> = {
+  beschikbaar: { bg: "#d1fae5", text: "#065f46", label: { nl: "Beschikbaar", en: "Available" } },
+  gereserveerd: { bg: "#fef3c7", text: "#92400e", label: { nl: "Gereserveerd", en: "Reserved" } },
+  verkocht: { bg: "#fee2e2", text: "#991b1b", label: { nl: "Verkocht", en: "Sold" } },
+  verhuur: { bg: "#dbeafe", text: "#1e40af", label: { nl: "Verhuur", en: "Rental" } },
 };
 
-export default function VehicleCard({ v }: { v: Vehicle }) {
-  const { lang } = useLang();
-  const s = STATUS_COLORS[v.status];
+const CONTENT = {
+  nl: { sold: "Verkocht", enquire: "Informeer / aanvragen" },
+  en: { sold: "Sold", enquire: "Enquire" },
+};
 
-  const sold = v.status === "verkocht";
+// Kaart met foto, prijs, specificaties en een CTA voor één voertuig.
+export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+  const { lang } = useLang();
+  const t = CONTENT[lang];
+  const status = STATUS_STYLES[vehicle.status];
+  const name = `${vehicle.make} ${vehicle.model}`;
 
   return (
-    <article
-      className="group flex flex-col overflow-hidden rounded-lg border transition-shadow duration-200 hover:shadow-lg"
-      style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
-    >
-      {/* Image */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: "16/10", backgroundColor: "var(--secondary)" }}>
+    <article className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow duration-200 hover:shadow-lg">
+      {/* Foto met statuslabel */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
         <img
-          src={v.img}
-          alt={`${v.make} ${v.model}`}
+          src={vehicle.img}
+          alt={name}
           loading="lazy"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
         <span
           className="absolute top-3 left-3 font-mono-label text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-sm"
-          style={{ backgroundColor: s.bg, color: s.text }}
+          style={{ backgroundColor: status.bg, color: status.text }}
         >
-          {lang === "nl" ? s.label_nl : s.label_en}
+          {status.label[lang]}
         </span>
       </div>
 
-      {/* Body */}
+      {/* Inhoud */}
       <div className="p-5 flex flex-col flex-1 gap-1">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-semibold text-base leading-snug">
-            {v.make} {v.model}
-          </h3>
-          <span className="font-display font-bold text-lg leading-tight shrink-0" style={{ color: "var(--primary)" }}>
-            {v.price}
-          </span>
+          <h3 className="font-semibold text-base leading-snug">{name}</h3>
+          <span className="font-display font-bold text-lg leading-tight shrink-0 text-primary">{vehicle.price}</span>
         </div>
 
-        {v.monthlyLease && (
-          <p className="font-mono-label text-[10px] tracking-widest uppercase" style={{ color: "var(--muted-foreground)" }}>
-            Lease: {v.monthlyLease}
+        {vehicle.monthlyLease && (
+          <p className="font-mono-label text-[10px] tracking-widest uppercase text-muted-foreground">
+            Lease: {vehicle.monthlyLease}
           </p>
         )}
 
-        <p className="text-sm leading-relaxed mt-1" style={{ color: "var(--secondary-foreground)" }}>
-          {v.shortDesc}
-        </p>
+        <p className="text-sm leading-relaxed mt-1 text-secondary-foreground">{vehicle.shortDesc}</p>
 
-        {/* Specs row */}
-        <ul className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
-          <li><span aria-hidden="true">📅 </span>{v.year}</li>
-          <li><span aria-hidden="true">⛽ </span>{v.fuel}</li>
-          <li><span aria-hidden="true">⚙️ </span>{v.transmission}</li>
-          {v.km !== "—" && <li><span aria-hidden="true">🛣️ </span>{v.km}</li>}
+        {/* Specificaties. Toegankelijkheid: de emoji's zijn decoratief en worden niet voorgelezen. */}
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+          <li><span aria-hidden="true">📅 </span>{vehicle.year}</li>
+          <li><span aria-hidden="true">⛽ </span>{vehicle.fuel}</li>
+          <li><span aria-hidden="true">⚙️ </span>{vehicle.transmission}</li>
+          {/* Huurauto's hebben geen kilometerstand ("—"); die tonen we dan niet. */}
+          {vehicle.km !== "—" && <li><span aria-hidden="true">🛣️ </span>{vehicle.km}</li>}
         </ul>
 
-        {/* Tags */}
+        {/* Kenmerken */}
         <ul className="flex flex-wrap gap-1.5 mt-2">
-          {v.tags.map((tag) => (
+          {vehicle.tags.map((tag) => (
             <li
               key={tag}
-              className="font-mono-label text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-sm"
-              style={{ backgroundColor: "var(--muted)", color: "var(--muted-foreground)", border: "1px solid var(--border)" }}
+              className="font-mono-label text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-sm border border-border bg-muted text-muted-foreground"
             >
               {tag}
             </li>
           ))}
         </ul>
 
-        {/* CTA */}
+        {/* CTA, met mt-auto onderaan de kaart zodat knoppen in een rij op één lijn staan */}
         <div className="mt-auto pt-4">
-          {sold ? (
+          {vehicle.status === "verkocht" ? (
+            // Toegankelijkheid: geen link, maar wel als uitgeschakeld gemarkeerd voor screenreaders.
             <span className="btn btn-disabled w-full py-2.5" aria-disabled="true">
-              {lang === "nl" ? "Verkocht" : "Sold"}
+              {t.sold}
             </span>
           ) : (
             <Link to="/contact" className="btn btn-primary w-full py-2.5">
-              {lang === "nl" ? "Informeer / aanvragen" : "Enquire"}
-              <span className="sr-only">: {v.make} {v.model}</span>
+              {t.enquire}
+              {/* Toegankelijkheid: maakt elke knop uniek in een lijst met links ("Informeer: Volkswagen Golf"). */}
+              <span className="sr-only">: {name}</span>
             </Link>
           )}
         </div>

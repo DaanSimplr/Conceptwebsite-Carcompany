@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { useLang, type Lang } from "../context/LangContext";
 import { company } from "../data/company";
 
+// Menu-items voor de header (desktop en mobiel) en de footer.
 // Home staat niet in het menu: het logo linkt naar de homepage.
 const NAV = {
   nl: [
@@ -23,7 +24,7 @@ const NAV = {
   ],
 };
 
-const UI = {
+const CONTENT = {
   nl: {
     skip: "Naar de inhoud",
     mainNav: "Hoofdnavigatie",
@@ -52,35 +53,33 @@ const UI = {
   },
 };
 
+// Volledige taalnamen; de knoppen tonen alleen de afkorting (NL/EN).
 const LANG_NAMES: Record<Lang, string> = { nl: "Nederlands", en: "English" };
+const LANGS: Lang[] = ["nl", "en"];
 
+// Taalschakelaar met een knop per taal; de actieve knop lijkt "ingedrukt".
 function LangSwitch() {
   const { lang, setLang } = useLang();
+
   return (
-    <div
-      role="group"
-      aria-label={UI[lang].langGroup}
-      className="flex p-0.5 rounded-md"
-      style={{ backgroundColor: "var(--muted)" }}
-    >
-      {(["nl", "en"] as Lang[]).map((l) => {
-        const active = lang === l;
+    // Toegankelijkheid: role="group" met label bundelt de knoppen als één bedieningselement.
+    <div role="group" aria-label={CONTENT[lang].langGroup} className="flex p-0.5 rounded-md bg-muted">
+      {LANGS.map((option) => {
+        const active = lang === option;
         return (
+          // Toegankelijkheid: aria-pressed geeft aan welke taal actief is,
+          // aria-label laat de volledige taalnaam voorlezen in plaats van "N L".
           <button
-            key={l}
+            key={option}
             type="button"
-            onClick={() => setLang(l)}
+            onClick={() => setLang(option)}
             aria-pressed={active}
-            aria-label={LANG_NAMES[l]}
-            className="min-w-9 px-2.5 py-1.5 rounded-sm font-mono-label text-[11px] tracking-widest uppercase transition-colors duration-150"
-            style={{
-              backgroundColor: active ? "var(--card)" : "transparent",
-              color: active ? "var(--primary)" : "var(--muted-foreground)",
-              fontWeight: active ? 600 : 400,
-              boxShadow: active ? "0 1px 2px rgba(26,32,48,0.12)" : "none",
-            }}
+            aria-label={LANG_NAMES[option]}
+            className={`min-w-9 px-2.5 py-1.5 rounded-sm font-mono-label text-[11px] tracking-widest uppercase transition-colors duration-150 ${
+              active ? "bg-card text-primary font-semibold shadow-[0_1px_2px_rgba(26,32,48,0.12)]" : "text-muted-foreground font-normal"
+            }`}
           >
-            {l.toUpperCase()}
+            {option.toUpperCase()}
           </button>
         );
       })}
@@ -88,46 +87,74 @@ function LangSwitch() {
   );
 }
 
+// Hamburgericoon, of een kruisje als het menu open is.
+function MenuIcon({ open }: { open: boolean }) {
+  const line = { stroke: "currentColor", strokeWidth: 1.75, strokeLinecap: "round" } as const;
+
+  return (
+    <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+      {open ? (
+        <>
+          <line x1="3" y1="1" x2="19" y2="15" {...line} />
+          <line x1="19" y1="1" x2="3" y2="15" {...line} />
+        </>
+      ) : (
+        <>
+          <line x1="1" y1="1" x2="21" y2="1" {...line} />
+          <line x1="1" y1="8" x2="21" y2="8" {...line} />
+          <line x1="1" y1="15" x2="21" y2="15" {...line} />
+        </>
+      )}
+    </svg>
+  );
+}
+
+// Vaste paginaopbouw: header met navigatie, de huidige pagina (<Outlet />) en de footer.
 export default function Layout() {
   const { lang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const nav = NAV[lang];
-  const ui = UI[lang];
+  const t = CONTENT[lang];
 
-  // sluit het mobiele menu en scroll naar boven bij een routewissel
+  // Sluit het mobiele menu en scroll naar boven bij een routewissel.
   useEffect(() => {
     setMenuOpen(false);
     window.scrollTo({ top: 0 });
   }, [location.pathname]);
 
   return (
-    <div style={{ backgroundColor: "var(--background)", color: "var(--foreground)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <a href="#inhoud" className="skip-link">{ui.skip}</a>
+    // min-h-screen + flex-1 op <main> houdt de footer onderaan, ook op korte pagina's.
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      {/* Toegankelijkheid: skiplink, alleen zichtbaar bij toetsenbordfocus, om de navigatie over te slaan. */}
+      <a href="#inhoud" className="skip-link">
+        {t.skip}
+      </a>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b" style={{ backgroundColor: "rgba(255,255,255,0.95)", borderColor: "var(--border)", backdropFilter: "blur(8px)" }}>
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6 h-[72px]">
+          {/* Logo, linkt naar de homepage */}
           <Link to="/" className="flex items-center gap-3 rounded-md shrink-0">
             <div
               aria-hidden="true"
-              className="w-10 h-10 flex items-center justify-center font-display font-bold text-xl rounded-md"
-              style={{ backgroundColor: "var(--primary)", color: "white" }}
+              className="w-10 h-10 flex items-center justify-center rounded-md bg-primary text-white font-display font-bold text-xl"
             >
               {company.initial[lang]}
             </div>
             <div>
-              <div className="font-display font-semibold text-base sm:text-lg leading-tight" style={{ color: "var(--foreground)" }}>
+              {/* Responsive: iets kleinere bedrijfsnaam op mobiel. */}
+              <div className="font-display font-semibold text-base sm:text-lg leading-tight text-foreground">
                 {company.name[lang]}
-                <span className="sr-only"> — {ui.homeLabel}</span>
+                {/* Toegankelijkheid: vertelt screenreaders waar de logolink naartoe gaat. */}
+                <span className="sr-only"> — {t.homeLabel}</span>
               </div>
-              <div className="font-mono-label text-[10px] tracking-widest uppercase" style={{ color: "var(--muted-foreground)" }}>
-                {ui.logoSub}
-              </div>
+              <div className="font-mono-label text-[10px] tracking-widest uppercase text-muted-foreground">{t.logoSub}</div>
             </div>
           </Link>
 
-          <nav aria-label={ui.mainNav} className="hidden xl:flex items-center">
+          {/* Responsive: desktopnavigatie, alleen vanaf xl (daaronder past het menu niet naast het logo). */}
+          <nav aria-label={t.mainNav} className="hidden xl:flex items-center">
             {nav.map((item) => (
               <NavLink
                 key={item.to}
@@ -142,42 +169,33 @@ export default function Layout() {
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Responsive: taalschakelaar in de header vanaf sm; op kleinere schermen staat hij in het mobiele menu. */}
             <div className="hidden sm:block">
               <LangSwitch />
             </div>
+
+            {/* Responsive: menuknop alleen onder xl.
+                Toegankelijkheid: aria-expanded en aria-controls koppelen de knop aan het menu,
+                en de knop is 44×44px (w-11 h-11), groot genoeg om met een vinger te raken. */}
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-expanded={menuOpen}
               aria-controls="mobiel-menu"
-              aria-label={menuOpen ? ui.menuClose : ui.menuOpen}
-              className="xl:hidden w-11 h-11 flex items-center justify-center rounded-md transition-colors duration-150 hover:bg-[var(--muted)]"
-              style={{ color: "var(--foreground)" }}
+              aria-label={menuOpen ? t.menuClose : t.menuOpen}
+              className="xl:hidden w-11 h-11 flex items-center justify-center rounded-md text-foreground transition-colors duration-150 hover:bg-muted"
             >
-              <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
-                {menuOpen ? (
-                  <>
-                    <line x1="3" y1="1" x2="19" y2="15" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-                    <line x1="19" y1="1" x2="3" y2="15" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="1" y1="1" x2="21" y2="1" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-                    <line x1="1" y1="8" x2="21" y2="8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-                    <line x1="1" y1="15" x2="21" y2="15" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-                  </>
-                )}
-              </svg>
+              <MenuIcon open={menuOpen} />
             </button>
           </div>
         </div>
 
+        {/* Responsive: uitklapmenu voor schermen smaller dan xl. Scrollt zelf als het hoger is dan het scherm. */}
         {menuOpen && (
           <nav
             id="mobiel-menu"
-            aria-label={ui.mainNav}
-            className="xl:hidden border-t py-2 max-h-[calc(100vh-72px)] overflow-y-auto"
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--card)" }}
+            aria-label={t.mainNav}
+            className="xl:hidden border-t border-border bg-card py-2 max-h-[calc(100vh-72px)] overflow-y-auto"
           >
             {nav.map((item) => (
               <NavLink
@@ -196,39 +214,40 @@ export default function Layout() {
         )}
       </header>
 
-      {/* Page content */}
-      <main id="inhoud" tabIndex={-1} style={{ flex: 1 }} className="focus:outline-none">
+      {/* ── Pagina-inhoud ── */}
+      {/* Toegankelijkheid: doel van de skiplink. tabIndex={-1} maakt <main> focusbaar zonder dat hij in de tabvolgorde komt. */}
+      <main id="inhoud" tabIndex={-1} className="flex-1 focus:outline-none">
         <Outlet />
       </main>
 
-      {/* Footer */}
-      <footer className="on-dark" style={{ backgroundColor: "var(--primary)" }}>
+      {/* ── Footer ── */}
+      {/* .on-dark maakt de focusrand wit, zodat die zichtbaar blijft op de blauwe achtergrond. */}
+      <footer className="on-dark bg-primary">
         <div className="max-w-7xl mx-auto px-6 pt-12 pb-8">
+          {/* Responsive: tagline en links onder elkaar op mobiel, naast elkaar vanaf md. */}
           <div className="grid gap-10 md:grid-cols-[1fr_auto]">
             <div className="max-w-sm">
               <div className="flex items-center gap-3">
                 <div
                   aria-hidden="true"
-                  className="w-9 h-9 flex items-center justify-center font-display font-bold text-lg rounded-md"
-                  style={{ backgroundColor: "white", color: "var(--primary)" }}
+                  className="w-9 h-9 flex items-center justify-center rounded-md bg-white text-primary font-display font-bold text-lg"
                 >
                   {company.initial[lang]}
                 </div>
                 <p className="font-display font-semibold text-lg text-white">{company.name[lang]}</p>
               </div>
-              <p className="text-sm leading-relaxed mt-3" style={{ color: "rgba(255,255,255,0.9)" }}>
-                {ui.tagline}
-              </p>
+              <p className="text-sm leading-relaxed mt-3 text-white/90">{t.tagline}</p>
             </div>
 
-            <nav aria-label={ui.footerNav}>
-              <p className="font-mono-label text-[10px] tracking-widest uppercase mb-3" style={{ color: "rgba(255,255,255,0.9)" }}>
-                {ui.footerHeading}
-              </p>
+            <nav aria-label={t.footerNav}>
+              <p className="font-mono-label text-[10px] tracking-widest uppercase mb-3 text-white/90">{t.footerHeading}</p>
               <ul className="grid grid-cols-2 gap-x-10 gap-y-2">
                 {nav.map((item) => (
                   <li key={item.to}>
-                    <Link to={item.to} className="text-sm text-white/90 hover:text-white hover:underline underline-offset-4 transition-colors duration-150">
+                    <Link
+                      to={item.to}
+                      className="text-sm text-white/90 hover:text-white hover:underline underline-offset-4 transition-colors duration-150"
+                    >
                       {item.label}
                     </Link>
                   </li>
@@ -237,9 +256,12 @@ export default function Layout() {
             </nav>
           </div>
 
-          <div className="mt-10 pt-6 border-t flex flex-col sm:flex-row justify-between gap-2 text-xs" style={{ borderColor: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}>
-            <p>© {new Date().getFullYear()} {company.name[lang]}</p>
-            <p>{ui.demo}</p>
+          {/* Responsive: copyright en disclaimer onder elkaar op mobiel, naast elkaar vanaf sm. */}
+          <div className="mt-10 pt-6 border-t border-white/20 flex flex-col sm:flex-row justify-between gap-2 text-xs text-white/90">
+            <p>
+              © {new Date().getFullYear()} {company.name[lang]}
+            </p>
+            <p>{t.demo}</p>
           </div>
         </div>
       </footer>

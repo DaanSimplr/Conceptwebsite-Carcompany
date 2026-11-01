@@ -31,10 +31,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # De site staat op /<repo-naam>/; vite.config.ts gebruikt FIGMA_PUBLIC_URL als base-pad.
+      # De site staat op /<repo-naam>/; vite.config.ts gebruikt BASE_PATH als base-pad.
       - run: pnpm build
         env:
-          FIGMA_PUBLIC_URL: /${{ github.event.repository.name }}
+          BASE_PATH: /${{ github.event.repository.name }}
 
       # Zorgt dat directe links zoals /contact niet op een 404 uitkomen.
       - run: cp dist/index.html dist/404.html

@@ -1,13 +1,17 @@
+// Eén voertuig uit het aanbod. Teksten zijn alleen in het Nederlands beschikbaar.
 export type Vehicle = {
   id: string;
+  // Bepaalt op welke categoriepagina het voertuig verschijnt.
   category: "personen" | "bedrijfs" | "verhuur" | "klassiek";
   make: string;
   model: string;
   year: number;
   fuel: string;
   transmission: string;
+  // Kilometerstand als tekst; "—" bij huurauto's, waar die niet van toepassing is.
   km: string;
   price: string;
+  // Alleen ingevuld bij voertuigen die ook te leasen zijn.
   monthlyLease?: string;
   status: "beschikbaar" | "verkocht" | "verhuur" | "gereserveerd";
   img: string;
@@ -15,6 +19,7 @@ export type Vehicle = {
   shortDesc: string;
 };
 
+// Het volledige aanbod, gegroepeerd per categorie.
 export const inventory: Vehicle[] = [
   // ── Personenauto's ──
   {
@@ -59,7 +64,7 @@ export const inventory: Vehicle[] = [
     price: "€ 22.750",
     status: "beschikbaar",
     img: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&h=400&fit=crop&auto=format",
-    tags: ["Trekhaak", "Groot kofferbak", "Verwarmde stoelen"],
+    tags: ["Trekhaak", "Grote kofferbak", "Verwarmde stoelen"],
     shortDesc: "Ruime stationwagen, ideaal voor gezin of lange ritten.",
   },
   {
@@ -75,7 +80,7 @@ export const inventory: Vehicle[] = [
     status: "gereserveerd",
     img: "https://images.unsplash.com/photo-1546614042-7df3c24c9e5d?w=600&h=400&fit=crop&auto=format",
     tags: ["Groot scherm", "Parkeersensoren", "Winterpakket"],
-    shortDesc: "Sparsame Focus met weinig km's en rijke uitrusting.",
+    shortDesc: "Zuinige Focus met weinig km's en rijke uitrusting.",
   },
   {
     id: "p5",
@@ -184,7 +189,7 @@ export const inventory: Vehicle[] = [
     monthlyLease: "€ 299/mnd",
     status: "verhuur",
     img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&h=400&fit=crop&auto=format",
-    tags: ["Kortdurend", "Langlopend lease", "Verzekering mogelijk"],
+    tags: ["Kortdurend", "Langlopende lease", "Verzekering mogelijk"],
     shortDesc: "Zuinige stadsauto, leverbaar per dag of in langlopend leasecontract.",
   },
   {
